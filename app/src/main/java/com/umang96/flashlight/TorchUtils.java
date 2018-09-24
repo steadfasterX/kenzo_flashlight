@@ -11,20 +11,20 @@ import java.io.InputStreamReader;
 public class TorchUtils {
 
     private static void flash_on(Context context){
-        String[] c1 = {"echo 100 > ~/sys/class/leds/led:torch_0/brightness","echo 100 > ~/sys/class/leds/led:torch_1/brightness"};
-        RunAsRoot(c1, context);
+        String c1 = Executor("echo 100 > ~/sys/class/leds/led:torch_0/brightness");
+        String c2 = Executor("echo 100 > ~/sys/class/leds/led:torch_1/brightness");
     }
 
     private static void flash_off(Context context){
-        String[] c1 = {"echo 0 > ~/sys/class/leds/led:torch_0/brightness","echo 0 > ~/sys/class/leds/led:torch_1/brightness"};
-        RunAsRoot(c1, context);
+        String c1 = Executor("echo 0 > ~/sys/class/leds/led:torch_0/brightness");
+        String c2 = Executor("echo 0 > ~/sys/class/leds/led:torch_1/brightness");
     }
 
     public static boolean check(Context context){
         String outp = Executor("cat ~/sys/class/leds/led:torch_0/brightness");
             try {
             if (outp.length()==1) {
-                    flash_on(context);
+                flash_on(context);
                 return true;
             }
             if (!(outp.length()==1)) {
@@ -33,7 +33,7 @@ public class TorchUtils {
         }
         catch(Exception e)
         {
-            Toast.makeText(context, "Error, have you granted root ?",
+            Toast.makeText(context, "Error, torch file permissions correct?",
                     Toast.LENGTH_SHORT).show();
         }
         return false;
@@ -43,7 +43,7 @@ public class TorchUtils {
         StringBuffer output = new StringBuffer();
         Process p=null;
         try {
-            p = Runtime.getRuntime().exec(new String[] { "su", "-c", command });
+            p = Runtime.getRuntime().exec(new String[] { "sh", "-c", command });
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
             String line = "";
             while ((line = reader.readLine())!= null) {
@@ -57,21 +57,16 @@ public class TorchUtils {
 
     }
 
-    public static void RunAsRoot(String[] cmds, Context context){
+    /* possible other and hackish way
+    public static void RunSH(String[] cmds, Context context){
         try{
-            Process p = Runtime.getRuntime().exec("su");
-            DataOutputStream os = new DataOutputStream(p.getOutputStream());
-            for (String tmpCmd : cmds) {
-                os.writeBytes(tmpCmd+"\n");
-            }
-            os.writeBytes("exit\n");
-            os.flush();
+            process = Runtime.getRuntime().exec(String.format("sh -c %s", cmds));
         }
         catch(Exception e)
         {
-            Toast.makeText(context, "RunAsRoot failed !",
+            Toast.makeText(context, "RunSH failed !",
                     Toast.LENGTH_SHORT).show();
         }
     }
-
+    */
 }
